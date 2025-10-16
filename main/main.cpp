@@ -1,16 +1,12 @@
 #include "freertos/FreeRTOS.h"
-#include "esp_timer.h"
 #include "lvgl.h"
 #include "lvgl_helpers.h"
 
 #include "Pixel.h"
 #include "image_data.h"
 
-#define LV_TICK_PERIOD_MS 1
 #define height 160
 #define width 80
-
-static void lv_tick_task(void *arg);
 
 void draw_picture();
 
@@ -38,23 +34,11 @@ extern "C" void app_main() {
     disp_drv.buffer = &disp_buf;
     lv_disp_drv_register(&disp_drv);
 
-    constexpr esp_timer_create_args_t periodic_timer_args = {
-        .callback = &lv_tick_task,
-        .arg = nullptr,
-        .dispatch_method = ESP_TIMER_TASK,
-        .name = "periodic_gui",
-        .skip_unhandled_events = false
-    };
-    esp_timer_handle_t periodic_timer;
-    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
-    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, LV_TICK_PERIOD_MS * 1000));
-
     draw_picture();
 
-    while (true) {
-        vTaskDelay(pdMS_TO_TICKS(10));
-        lv_task_handler();
-    }
+    lv_task_handler();
+
+    vTaskDelete(nullptr);
 }
 
 
@@ -67,10 +51,4 @@ void draw_picture() {
             Pixel(j, i, image_data[i * image_width + j]).draw(canvas);
         }
     }
-}
-
-static void lv_tick_task(void *arg) {
-    (void) arg;
-
-    lv_tick_inc(LV_TICK_PERIOD_MS);
 }
