@@ -3,5 +3,5 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := lvgl-demo
+PROJECT_NAME := esp32s3-image
 include $(IDF_PATH)/make/project.mk

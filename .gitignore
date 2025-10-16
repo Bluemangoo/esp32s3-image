@@ -68,3 +68,9 @@ platformio.ini
 
 # VS Code
 .vscode/
+
+# Python
+.venv/
+__pycache__/
+/image/
+/main/image_data.h
