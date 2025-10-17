@@ -7,7 +7,7 @@ from .pixel_data import PixelData
 def parse_image(img: ImageFile, x: int, y: int, rotate: bool) -> PixelData:
     data = PixelData(x, y)
     if rotate:
-        img = img.transpose(Image.Transpose.TRANSPOSE)
+        img = img.transpose(Image.Transpose.ROTATE_90)
 
     img = img.resize((x, y)).convert("RGB")
     for i in range(x):
