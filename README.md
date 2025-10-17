@@ -72,3 +72,5 @@ Enable it first
 - Flash SPI mode (**QIO**)
 - Flash SPI speed (**80 MHz**)
 - Flash size (**16 MB**)
+
+**Tip: DO NOT use P33-P37 when PSRAM is enabled, they are used for PSRAM.**
