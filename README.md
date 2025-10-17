@@ -14,28 +14,32 @@ Show image on ESP32S3 with ST7735S display
 
 ## Menuconfig options
 
-In Component config:
-
-### LVGL configuration
+### `(Top) → Component config → LVGL configuration`
 
 - horizontal&vertical(160/80)
 - Color depth(RGB565)
 - Swap the 2 bytes of RGB565 color (try)
 
-### LVGL TFT Display controller
+### `(Top) → Component config → LVGL TFT Display controller`
 
 - Select a display controller model. (ST7735S)
 - Display Pin Assignments
     - My configure:
-    - (36) GPIO for MOSI (Master Out Slave In)
+    - (13) GPIO for MOSI (Master Out Slave In)
     - \[ ] GPIO for MISO (Master In Slave Out)
-    - (35) GPIO for CLK (SCK / Serial Clock)
+    - (14) GPIO for CLK (SCK / Serial Clock)
     - \[*] Use CS signal to control the display
-    - (39)    GPIO for CS (Slave Select)
+    - (7)     GPIO for CS (Slave Select)
     - \[*] Use DC signal to control the display
-    - (38)    GPIO for DC (Data / Command)
-    - (37) GPIO for Reset
+    - (17)    GPIO for DC (Data / Command)
+    - (-1) GPIO for Reset
     - \[ ] Enable control of the display backlight by using an GPIO.
+
+## ESP PSRAM
+
+If your ESP32S3 has PSRAM, enable it in menuconfig to improve performance.
+
+When display an animation, PSRAM is recommended.
 
 ## Wiring
 
@@ -45,11 +49,26 @@ As configured above, wire as:
 |-------------|-------------|
 | GND         | GND         |
 | 3V3         | VCC         |
-| 35          | SCL (CLK)   |
-| 36          | SDA (MOSI)  |
-| 37          | RST         |
-| 38          | DC          |
-| 39          | CS          |
+| 14          | SCL (CLK)   |
+| 13          | SDA (MOSI)  |
+| RST         | RST         |
+| 17          | DC          |
+| 7           | CS          |
 | 3V3         | BLK         |
 
 Tips: if you want to use backlight control, wire a GPIO pin to BLK and configure it in menuconfig.
+
+## Configure PSRAM for N16R8
+
+### `(Top) → Component config → ESP PSRAM`
+
+Enable it first
+
+- Mode (QUAD/OCT) of SPI RAM chip in use (**Octal Mode** PSRAM)
+- Set RAM clock speed (**80MHz** clock speed)
+
+### `(Top) → Serial flasher config`
+
+- Flash SPI mode (**QIO**)
+- Flash SPI speed (**80 MHz**)
+- Flash size (**16 MB**)

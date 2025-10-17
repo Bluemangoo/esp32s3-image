@@ -1,5 +1,6 @@
 from PIL import Image
 
+from .gif import gif2frames
 from .parse_image import parse_image
 
 
@@ -25,22 +26,39 @@ def image_to_code(image_path: str, size: str, rotate: bool) -> str:
 
     img = Image.open(image_path)
 
-    if rotate:
-        img = img.transpose(Image.Transpose.TRANSPOSE)
-
     (original_width, original_height) = img.size
-    if abs((original_width / original_height) / (x / y) - 1) > 0.02:
+    if rotate:
+        (original_width, original_height) = (original_height, original_width)
+    if abs((original_width / original_height) / (x / y) - 1) > 0.05:
         raise RuntimeError(
             f"Image size does not match the target size, need {size_name}, but got {original_width}x{original_height}")
-    img = img.resize((x, y))
 
-    data = parse_image(img, x, y)
+    is_animated = hasattr(img, "is_animated") and img.is_animated
+
+    data = []
+    delay = 0
+
+    if is_animated:
+        delay, frames = gif2frames(img)
+        for frame in frames:
+            data.append(parse_image(frame, x, y, rotate))
+    else:
+        data = [parse_image(img, x, y, rotate)]
+
+    extra_defines = ""
+    if is_animated:
+        extra_defines = f"""
+#define IMAGE_ANIMATED
+#define image_frame_delay {delay}
+"""
 
     return f"""#ifndef ESP_IMAGE_IMAGE_DATA_H
 #define ESP_IMAGE_IMAGE_DATA_H
 
-constexpr uint16_t image_data[]{data.to_string()};
-constexpr int16_t image_width = {x};
-constexpr int16_t image_height = {y};
+#include <vector>
+
+static const {"std::vector<" if is_animated else ""}std::vector<uint16_t>{">" if is_animated else ""} image_data = {f"{"{" + ",".join([d.to_string() for d in data]) + "}"}" if is_animated else f"{data[0].to_string()}"};
+#define image_width {x}
+#define image_height {y}{extra_defines}
 
 #endif ///ESP_IMAGE_IMAGE_DATA_H"""
