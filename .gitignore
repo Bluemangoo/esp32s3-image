@@ -6,3 +6,4 @@
 .vscode/ipch
 /image/
 /src/image_data.h
+__pycache__/
